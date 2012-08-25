@@ -1,9 +1,3 @@
-/* Arduino USB Keyboard HID demo
-*
-* Sends Volume up, hello world, and Volume Down to the host PC
-*
-*/
-
 void setup();
 void loop();
 
@@ -12,10 +6,10 @@ void loop();
 #define KEY_RIGHT_CTRL	0x10
 #define KEY_RIGHT_SHIFT	0x20
 
-#define LED 13
-#define PIN_PTT 7
-#define PTT_KEY "g"
-#define PTT_MOD 0x00
+#define LED 13       // Digital output for LED display of PTT function. 13 is the board built in LED.
+#define PIN_PTT 7    // The IO pin for the PTT button, floats high, so wire to ground for PTT.
+#define PTT_KEY "g"  // A specific ASCII key - note that + and - are mapped to volume up and volume down
+#define PTT_MOD 0x10 // Note this is one of the above KEY_(LEFT|RIGHT)_(CTRL|SHIFT) or 0x00 for none.
 
 void setup() {
     Serial.begin(9600);
