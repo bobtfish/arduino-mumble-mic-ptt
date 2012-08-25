@@ -12,30 +12,42 @@ void loop();
 #define KEY_RIGHT_CTRL	0x10
 #define KEY_RIGHT_SHIFT	0x20
 
+#define LED 13
 #define PIN_PTT 7
+#define PTT_KEY "g"
+#define PTT_MOD 0x00
 
 void setup() {
     Serial.begin(9600);
+    pinMode(LED, OUTPUT);
     pinMode(PIN_PTT, INPUT);
-    delay(200);
+    delay(5000);
 }
 
-char *str = " hello world";
-
 void loop() {
-    uint8_t buf[8] = { 0 };	/* Keyboard report buffer */
+    int state = 1;
+    state = digitalRead(PIN_PTT);
+    if (state != 1) {
+        digitalWrite(LED, HIGH);
+        sendKey(PTT_KEY, PTT_MOD);
+        while (state != 1) {
+            state = digitalRead(PIN_PTT);
+        }
+        digitalWrite(LED, LOW);
+        releaseKey();
+    }
+}
 
-    char *chp = str;
-    delay(5000);
-    while (*chp) {
-	    
-	if ((*chp >= 'a') && (*chp <= 'z')) {
-	    buf[2] = *chp - 'a' + 4;
-	} else if ((*chp >= 'A') && (*chp <= 'Z')) {
+void sendKey (char *ch, int mod) {
+      uint8_t buf[8] = { 0 };	/* Keyboard report buffer */
+  
+	if ((*ch >= 'a') && (*ch <= 'z')) {
+	    buf[2] = *ch - 'a' + 4;
+	} else if ((*ch >= 'A') && (*ch <= 'Z')) {
 	    buf[0] = KEY_LEFT_SHIFT;	/* Caps */
-	    buf[2] = *chp - 'A' + 4;
+	    buf[2] = *ch - 'A' + 4;
 	} else {
-	    switch (*chp) {
+	    switch (*ch) {
 	    case ' ':
 	    	buf[2] = 0x2c;	// Space
 		break;
@@ -51,17 +63,17 @@ void loop() {
 		break;
 	    }
 	}
+    buf[0] = buf[0] | mod;
 
-	Serial.write(buf, 8);	// Send keypress
-        releaseKey();
-	chp++;
-    }
+    Serial.write(buf, 8); // Send keypress
+    delay(125);
 }
 
 void releaseKey() {
   uint8_t mybuf[8] = { 0 };
   mybuf[0] = 0;
   mybuf[2] = 0;
-  Serial.write(mybuf, 8);	// Release key
+  Serial.write(mybuf, 8); // Release key
+  delay(125);
 }
 
