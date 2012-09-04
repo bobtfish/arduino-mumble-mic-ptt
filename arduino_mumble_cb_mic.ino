@@ -6,28 +6,38 @@ void loop();
 #define KEY_RIGHT_CTRL	0x10
 #define KEY_RIGHT_SHIFT	0x20
 
-#define LED 13       // Digital output for LED display of PTT function. 13 is the board built in LED.
-#define PIN_PTT 7    // The IO pin for the PTT button, floats high, so wire to ground for PTT.
+#define LED_INT 13       // Digital output for LED display of PTT function. 13 is the board built in LED.
+#define LED 2       // Digital output for LED display of PTT function
+#define PIN_PTT_BUTTON 7    // The IO pin for the PTT button, floats high, so wire to ground for PTT and pull up with 10k res.
+#define PIN_PTT_MIC 6       // The IO pin for the PTT switch on the mic. Wiring as above.
 #define PTT_KEY "g"  // A specific ASCII key - note that + and - are mapped to volume up and volume down
 #define PTT_MOD 0x10 // Note this is one of the above KEY_(LEFT|RIGHT)_(CTRL|SHIFT) or 0x00 for none.
 
 void setup() {
     Serial.begin(9600);
+    pinMode(LED_INT, OUTPUT);
     pinMode(LED, OUTPUT);
-    pinMode(PIN_PTT, INPUT);
+    pinMode(PIN_PTT_BUTTON, INPUT);
+    pinMode(PIN_PTT_MIC, INPUT);
     delay(5000);
 }
 
 void loop() {
-    int state = 1;
-    state = digitalRead(PIN_PTT);
-    if (state != 1) {
+    int state_ptt_button = 1;
+    int state_ptt_mic = 1;
+    state_ptt_button = digitalRead(PIN_PTT_BUTTON);
+    state_ptt_mic = digitalRead(PIN_PTT_MIC);
+
+    if ( ( 1 != state_ptt_button ) | ( 1 != state_ptt_mic )) {
         digitalWrite(LED, HIGH);
+        digitalWrite(LED_INT, HIGH);
         sendKey(PTT_KEY, PTT_MOD);
-        while (state != 1) {
-            state = digitalRead(PIN_PTT);
+        while ( (1 != state_ptt_button) | (1 != state_ptt_mic) ) {
+            state_ptt_button = digitalRead(PIN_PTT_BUTTON);
+            state_ptt_mic = digitalRead(PIN_PTT_MIC);
         }
         digitalWrite(LED, LOW);
+        digitalWrite(LED_INT, LOW);
         releaseKey();
     }
 }
