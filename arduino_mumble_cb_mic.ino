@@ -31,7 +31,8 @@ void loop() {
     if ( ( 1 != state_ptt_button ) | ( 1 != state_ptt_mic )) {
         digitalWrite(LED, HIGH);
         digitalWrite(LED_INT, HIGH);
-        sendKey(PTT_KEY, PTT_MOD);
+        //sendKey(PTT_KEY, PTT_MOD);
+        sendWindowsKey();
         while ( (1 != state_ptt_button) | (1 != state_ptt_mic) ) {
             state_ptt_button = digitalRead(PIN_PTT_BUTTON);
             state_ptt_mic = digitalRead(PIN_PTT_MIC);
@@ -40,6 +41,13 @@ void loop() {
         digitalWrite(LED_INT, LOW);
         releaseKey();
     }
+}
+
+void sendWindowsKey () {
+  uint8_t buf[8] = { 0 };	/* Keyboard report buffer */
+  buf[2] = 0xE3;  // Left windows key
+  Serial.write(buf, 8); // Send keypress
+  delay(125);
 }
 
 void sendKey (char *ch, int mod) {
